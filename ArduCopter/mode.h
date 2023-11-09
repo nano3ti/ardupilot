@@ -1942,7 +1942,31 @@ protected:
     const char *name() const override { return "SQUARE"; }
     const char *name4() const override { return "SQAR"; }
 
+    bool is_taking_off() const override { return _state == _State::TAKEOFF; }
+    bool is_landing() const override { return _state == _State::LANDING; }
+
     uint32_t wp_distance() const override;
     int32_t wp_bearing() const override;
+
+private:
+
+    void _start();
+    bool _wp_reached() const;
+    void _set_wp(uint8_t wp_idx);
+
+    enum class _State {
+        START,
+        TAKEOFF,
+        WP,
+        LANDING,
+        LANDED
+    };
+
+    static const uint8_t _n_wps = 4;
+
+    _State _state = _State::START;
+    Vector2p _wps [_n_wps] = {};
+    uint8_t _wp_idx;
+    float _ground_alt = 0;
 
 };
