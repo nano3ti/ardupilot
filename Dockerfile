@@ -48,9 +48,18 @@ RUN export ARDUPILOT_ENTRYPOINT="/home/${USER_NAME}/ardupilot_entrypoint.sh" \
 # Set the buildlogs directory into /tmp as other directory aren't accessible
 ENV BUILDLOGS=/tmp/buildlogs
 
+# Install gazebo
+RUN sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null && \
+sudo apt-get update
+RUN sudo apt-get install -y gz-garden libgz-sim7-dev rapidjson-dev
+
 # Cleanup
 RUN sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN echo 'export GZ_SIM_SYSTEM_PLUGIN_PATH=/ardupilot/gz_ws/src/ardupilot_gazebo/build:${GZ_SIM_SYSTEM_PLUGIN_PATH}' >> ~/.bashrc
+RUN echo 'export GZ_SIM_RESOURCE_PATH=/ardupilot/gz_ws/src/ardupilot_gazebo/models:/ardupilot/gz_ws/src/ardupilot_gazebo/worlds:${GZ_SIM_RESOURCE_PATH}' >> ~/.bashrc
 
 ENV CCACHE_MAXSIZE=1G
 ENTRYPOINT ["/ardupilot_entrypoint.sh"]
